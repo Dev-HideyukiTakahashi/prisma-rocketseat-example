@@ -33,3 +33,31 @@ Exemplo com porsgresql:
 Após a instalação, configurar o .env
 
 ---
+
+#### Exemplo model (migration):
+
+Arquivo `schema.prisma`
+
+```prisma
+model User {
+  id    String @id @default(uuid())
+  name  String
+  email String @unique
+
+  @@map("users") // nome da tabela no db
+}
+```
+
+- Executando a migration:
+  - `npx prisma migrate dev `
+
+---
+
+Prisma Studio:
+
+`npx prisma studio `
+
+- http://localhost:5555/
+  - É possível visualizar o banco de dados pelo browser
+
+---
