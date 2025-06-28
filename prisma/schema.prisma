@@ -13,5 +13,22 @@ model User {
   name  String
   email String @unique
 
+  questions Question[]
+
   @@map("users")
+}
+
+model Question {
+  id      String @id @default(uuid())
+  title   String
+  content String
+
+  createAt  DateTime @default(now()) @map("created_at") // mapeia como vai ficar no banco
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("questions")
 }
