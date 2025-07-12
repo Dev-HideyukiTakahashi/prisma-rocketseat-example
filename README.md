@@ -100,6 +100,27 @@ Exemplo de consulta com prisma:
     });
 ```
 
+Exemplo de consulta com prisma:
+
+```javascript
+    const refunds = await prisma.refunds.findMany({
+      // pagination
+      skip,
+      take: perPage,
+    
+      where: {
+        user: {
+          name: {
+            contains: name.trim(),
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      // inclui apenas o nome do user no payload
+      include: { user: { select: { name: true } } },
+    });
+```
+
 Create:
 
 ```javascript
@@ -156,3 +177,62 @@ package.json config:
 Depois é só executar no terminal para criar o seed
 
 `npx prisma db seed  `
+
+---
+
+#### Exemplo de busca com pagination
+
+```javascript
+  async index(request: Request, response: Response) {
+    const querySchema = z.object({
+      name: z.string().optional().default(''),
+      page: z.coerce.number().optional().default(1),
+      perPage: z.coerce.number().optional().default(10),
+    });
+
+    const { name, page, perPage } = querySchema.parse(request.query);
+
+    // calcula valor de skip
+    const skip = (page - 1) * perPage;
+
+    const refunds = await prisma.refunds.findMany({
+      // pagination
+      skip,
+      take: perPage,
+
+      where: {
+        user: {
+          name: {
+            contains: name.trim(),
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      // inclui apenas o nome do user no payload
+      include: { user: { select: { name: true } } },
+    });
+
+    // pegando a quantidade de registros
+    const totalRecords = await prisma.refunds.count({
+      where: {
+        user: {
+          name: {
+            contains: name.trim(),
+          },
+        },
+      },
+    });
+
+    const totalPages = Math.ceil(totalRecords / perPage);
+
+    return response.json({
+      refunds,
+      pagination: {
+        page,
+        perPage,
+        totalRecords,
+        totalPages: totalPages > 0 ? totalPages : 1,
+      },
+    });
+  }
+```
